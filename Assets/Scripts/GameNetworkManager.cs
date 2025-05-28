@@ -18,6 +18,7 @@ public class GameNetworkManager : MonoBehaviour
 
     public Action<SteamId> OnHostCreated;
     public Action<Lobby> LobbyDataChanged;
+    public Action<Lobby> LobbyEntered;
     public Action<Lobby, Friend> LobbyMemberJoined;
 
     void Awake()
@@ -103,6 +104,8 @@ public class GameNetworkManager : MonoBehaviour
 
         transport.targetSteamId = id;
 
+        CurrentUser = new Friend(SteamClient.SteamId);
+
         if (NetworkManager.Singleton.StartClient())
             Debug.Log("Client has joined!", this);
     }
@@ -153,10 +156,20 @@ public class GameNetworkManager : MonoBehaviour
 
     private void OnLobbyEntered(Lobby lobby)
     {
-        if (NetworkManager.Singleton.IsHost) return;
+        Debug.Log($"OnLobbyEntered called. IsHost: {NetworkManager.Singleton.IsHost}");
+        Debug.Log($"Lobby Owner: {lobby.Owner.Id}, Current User: {SteamClient.SteamId}");
 
+        if (NetworkManager.Singleton.IsHost)
+        {
+            Debug.Log("User is host, not starting client");
+            return;
+        }
+
+        CurrentLobby = lobby;
+        LobbyEntered?.Invoke(lobby);
+
+        Debug.Log($"About to start client with SteamId: {lobby.Owner.Id}");
         StartClient(lobby.Owner.Id);
-        LobbyMemberJoined.Invoke(lobby, CurrentUser);
     }
 
     private void OnLobbyCreated(Result result, Lobby lobby)
