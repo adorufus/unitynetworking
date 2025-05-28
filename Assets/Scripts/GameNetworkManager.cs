@@ -123,14 +123,16 @@ public class GameNetworkManager : MonoBehaviour
         return request;
     }
 
-    private void OnGameLobbyJoinRequested(Lobby lobby, SteamId id)
+    private async void OnGameLobbyJoinRequested(Lobby lobby, SteamId id)
     {
+        await lobby.Join();
+
         bool isSame = lobby.Owner.Id.Equals(id);
         Debug.Log($"Owner: {lobby.Owner}");
         Debug.Log($"Id: {id}");
         Debug.Log($"IsSame: {isSame}", this);
 
-        StartClient(id);
+        // StartClient(id);
     }
 
     private void OnLobbyInvite(Friend friend, Lobby lobby)
@@ -154,6 +156,7 @@ public class GameNetworkManager : MonoBehaviour
         if (NetworkManager.Singleton.IsHost) return;
 
         StartClient(lobby.Owner.Id);
+        LobbyMemberJoined.Invoke(lobby, CurrentUser);
     }
 
     private void OnLobbyCreated(Result result, Lobby lobby)

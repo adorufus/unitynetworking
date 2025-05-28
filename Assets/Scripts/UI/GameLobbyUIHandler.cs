@@ -27,8 +27,6 @@ public class GameLobbyUIHandler : MonoBehaviour
     {
         gnmInstance = GameNetworkManager.Instance;
 
-        maxPlayerCount = gnmInstance.CurrentLobby.Value.MaxMembers;
-
         gnmInstance.LobbyDataChanged += OnLobbyDataChanged;
         gnmInstance.LobbyMemberJoined += OnLobbyMemberJoined;
 
@@ -42,8 +40,8 @@ public class GameLobbyUIHandler : MonoBehaviour
 
     void OnDestroy()
     {
-        gnmInstance.LobbyDataChanged += OnLobbyDataChanged;
-        gnmInstance.LobbyMemberJoined += OnLobbyMemberJoined;
+        gnmInstance.LobbyDataChanged -= OnLobbyDataChanged;
+        gnmInstance.LobbyMemberJoined -= OnLobbyMemberJoined;
     }
 
     private void OnLobbyMemberJoined(Lobby lobby, Friend friend)
@@ -52,6 +50,8 @@ public class GameLobbyUIHandler : MonoBehaviour
         GameObject playerEntry = Instantiate(playerNamePrefab, playerNameHolder);
         TextMeshProUGUI playerText = playerEntry.GetComponent<TextMeshProUGUI>();
         playerText.text = friend.Name;
+
+        roomDetailsText.text = $"{lobby.GetData("name")} ({lobby.MemberCount}/{lobby.MaxMembers})";
 
         // foreach (Friend player in lobby.Members)
         // {
